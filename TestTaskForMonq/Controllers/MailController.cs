@@ -23,9 +23,9 @@ namespace Mails.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public  IActionResult Get()
         {
-            var logs = await _repository.GetLogs();
+            var logs =  _repository.GetLogs();
             return Ok(logs);
         }
 
