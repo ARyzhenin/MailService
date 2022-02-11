@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Mails.Models;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +10,12 @@ namespace Mails.Repository
 {
     public interface ILogRepository
     {
-        public Task<IEnumerable<Log>> GetLogs();
-        
-        public Task PostLog(Log log);
+        public IEnumerable<Log> GetLogs();
+
+        public void PostLog(Log log);
     }
 
-    
+
     public class LogRepository : ILogRepository
     {
         private readonly ApplicationDbContext _context;
@@ -23,17 +24,17 @@ namespace Mails.Repository
         {
             _context = context;
         }
-        
-        public async Task<IEnumerable<Log>> GetLogs()
+
+        public IEnumerable<Log> GetLogs()
         {
-            var logs = await _context.Logs2.ToListAsync();
+            var logs = _context.Logs2.ToList();
             return logs;
         }
-        
-        public async Task PostLog(Log log)
+
+        public void PostLog(Log log)
         {
             _context.Logs2.Add(log);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 }
