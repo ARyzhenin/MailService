@@ -33,29 +33,29 @@ namespace Mails.Controllers
         public IActionResult Post(MailInfoDto model)
         {
             _mailService.SendMailAsync(model);
-            foreach (var recipient in model.Recipients)
-            {
-                try
-                {
-                    var log = new Log
-                    {
-                        Body = model.Body,
-                        Recipient = recipient,
-                        Subject = model.Subject,
-                        DateOfCreation = DateTime.Now
-                    };
+            //foreach (var recipient in model.Recipients)
+            //{
+            //    try
+            //    {
+            //        var log = new Log
+            //        {
+            //            Body = model.Body,
+            //            Recipient = recipient,
+            //            Subject = model.Subject,
+            //            DateOfCreation = DateTime.Now
+            //        };
 
-                    _repository.PostLog(log);
+            //        _repository.PostLog(log);
                     
-                    //return Ok(log);  //может это не надо?
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+            //        //return Ok(log);  //может это не надо?
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        Console.WriteLine(e);
+            //        throw;
+            //    }
 
-            }
+            //}
             return Ok();
 
         }
