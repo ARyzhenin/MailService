@@ -34,7 +34,7 @@ namespace Mails
             services.AddTransient<IMailService, MailService>();
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"))); ;
+                    Configuration.GetConnectionString("DefaultConnection"))); 
 
 
             services.AddControllers();

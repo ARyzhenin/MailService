@@ -18,12 +18,13 @@ namespace Mails.Services
     public class MailService : IMailService
 
     {
-        private  readonly ILogRepository _repository;
+        private readonly ILogRepository _repository;
 
         public MailService(ILogRepository repository)
         {
             _repository = repository;
         }
+
         public async Task SendMailAsync(MailInfoDto model)
         {
             var body = model.Body;
@@ -35,6 +36,7 @@ namespace Mails.Services
             var emailMessage = new MimeMessage();
 
             emailMessage.From.Add(new MailboxAddress("Имя отправителя", "rav81294@gmail.com"));
+
 
             foreach (var recipient in recipients)
             {
@@ -59,7 +61,7 @@ namespace Mails.Services
                 await client.DisconnectAsync(true);
             }
 
-            foreach (var recipient in model.Recipients)
+            foreach (var recipient in recipients)
             {
                 try
                 {
@@ -76,11 +78,12 @@ namespace Mails.Services
                     {
                         log.Result = Status.Failed;
                     }
-                    else log.Result = Status.OK;
+                    else
+                    {
+                        log.Result = Status.OK;
+                    }
 
                     _repository.PostLog(log);
-
-                   
                 }
                 catch (Exception e)
                 {
