@@ -27,13 +27,13 @@ namespace Mails.Repository
 
         public IEnumerable<Log> GetLogs()
         {
-            var logs = _context.Logs2.ToList();
+            var logs = _context.Logs.Include(u => u.Recipients).ToList();
             return logs;
         }
 
         public void PostLog(Log log)
         {
-            _context.Logs2.Add(log);
+            _context.Logs.Add(log);
             _context.SaveChanges();
         }
     }

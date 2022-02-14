@@ -4,14 +4,16 @@ using Mails;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace TestTaskForMonq.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220214070625_ChangeTypeResult")]
+    partial class ChangeTypeResult
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,7 +23,7 @@ namespace TestTaskForMonq.Migrations
 
             modelBuilder.Entity("Mails.Models.Log", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("LogId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -35,51 +37,18 @@ namespace TestTaskForMonq.Migrations
                     b.Property<string>("FailedMessage")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Recipient")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Result")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Subject")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("LogId");
 
-                    b.ToTable("Logs");
-                });
-
-            modelBuilder.Entity("Mails.Models.Recipient", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("EMailAdress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("LogId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LogId");
-
-                    b.ToTable("Recipients");
-                });
-
-            modelBuilder.Entity("Mails.Models.Recipient", b =>
-                {
-                    b.HasOne("Mails.Models.Log", "Log")
-                        .WithMany("Recipients")
-                        .HasForeignKey("LogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Log");
-                });
-
-            modelBuilder.Entity("Mails.Models.Log", b =>
-                {
-                    b.Navigation("Recipients");
+                    b.ToTable("Logs2");
                 });
 #pragma warning restore 612, 618
         }
