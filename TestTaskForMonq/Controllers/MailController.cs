@@ -23,40 +23,26 @@ namespace Mails.Controllers
         }
 
         [HttpGet]
-        public  IActionResult Get()
+        public IActionResult Get()
         {
-            var logs =  _repository.GetLogs();
+            var logs = _repository.GetLogs();
             return Ok(logs);
         }
 
         [HttpPost]
-        public IActionResult Post(MailInfoDto model)
+        public async Task<IActionResult> PostAsync(MailInfoDto model)
         {
-            _mailService.SendMailAsync(model);
-            //foreach (var recipient in model.Recipients)
-            //{
-            //    try
-            //    {
-            //        var log = new Log
-            //        {
-            //            Body = model.Body,
-            //            Recipient = recipient,
-            //            Subject = model.Subject,
-            //            DateOfCreation = DateTime.Now
-            //        };
-
-            //        _repository.PostLog(log);
-                    
-            //        //return Ok(log);  //может это не надо?
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        Console.WriteLine(e);
-            //        throw;
-            //    }
-
-            //}
-            return Ok();
+            try
+            {
+                await _mailService.SendMailAsync(model);
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return BadRequest("Проблемы с отправкой сообщения");
+            }
+           
+            
 
         }
     }

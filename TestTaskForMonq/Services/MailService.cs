@@ -49,49 +49,68 @@ namespace Mails.Services
             {
                 Text = body
             };
-
-            using (var client = new SmtpClient())
+            try
             {
-                await client.ConnectAsync("smtp.gmail.com", 587, false);
-
-                await client.AuthenticateAsync("rav81294@gmail.com", "hccmajhydjvrahhb");
-
-                await client.SendAsync(emailMessage);
-
-                await client.DisconnectAsync(true);
-            }
-
-            foreach (var recipient in recipients)
-            {
-                try
+                using (var client = new SmtpClient())
                 {
-                    var log = new Log
-                    {
-                        Body = model.Body,
-                        Recipient = recipient,
-                        Subject = model.Subject,
-                        DateOfCreation = DateTime.Now,
-                        FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
-                    };
+                    await client.ConnectAsync("smtp.gmail.com", 587, false);
 
-                    if (log.FailedMessage != null)
-                    {
-                        log.Result = Status.Failed;
-                    }
-                    else
-                    {
-                        log.Result = Status.OK;
-                    }
+                    await client.AuthenticateAsync("rav81294@gmail.com", "hccmajhydjvrahhb");
 
-                    _repository.PostLog(log);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
+                    await client.SendAsync(emailMessage);
+
+                    await client.DisconnectAsync(true);
                 }
 
             }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            //foreach (var recipient in recipients)
+            //{
+            try
+            {
+                var log = new Log
+                {
+                    Body = model.Body,
+                    Recipients = recipients.Select(recipient => new Recipient()
+                    {
+                        EMailAdress = recipient
+                    }).ToList(),
+                    Subject = model.Subject,
+                    DateOfCreation = DateTime.Now,
+                    FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
+                };
+                //foreach (var recip in recipients)
+                //{
+
+                //    var recipient = new Recipient
+                //    {
+                //        Id=log.LogId,
+                //        Adress = recip
+                //    };
+                //}
+
+                if (log.FailedMessage != null)
+                {
+                    log.Result = Status.Failed.ToString();
+                }
+                else
+                {
+                    log.Result = Status.OK.ToString();
+                }
+
+                _repository.PostLog(log);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            //}
 
         }
 
