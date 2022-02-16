@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace Mails.Models
+namespace TestTaskForMonq.Models
 {
     public enum Status
     {

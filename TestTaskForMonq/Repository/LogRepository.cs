@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Mails.Models;
+using TestTaskForMonq.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Mails.Repository
+
+namespace TestTaskForMonq.Repository
 {
     public interface ILogRepository
     {
-        public IEnumerable<Log> GetLogs();
+        public Task<IEnumerable<Log>> GetLogsAsync();
 
-        public void PostLog(Log log);
+        public Task PostLogAsync(Log log);
     }
 
 
@@ -25,16 +23,16 @@ namespace Mails.Repository
             _context = context;
         }
 
-        public IEnumerable<Log> GetLogs()
+        public async Task<IEnumerable<Log>> GetLogsAsync()
         {
-            var logs = _context.Logs.Include(u => u.Recipients).ToList();
+            var logs = await _context.Logs.Include(u => u.Recipients).ToArrayAsync();
             return logs;
         }
 
-        public void PostLog(Log log)
+        public async Task PostLogAsync(Log log)
         {
-            _context.Logs.Add(log);
-            _context.SaveChanges();
+            await _context.Logs.AddAsync(log);
+            await _context.SaveChangesAsync();
         }
     }
 }

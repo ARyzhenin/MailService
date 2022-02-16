@@ -1,8 +1,7 @@
-﻿using Mails.Models;
+﻿using TestTaskForMonq.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
-namespace Mails
+namespace TestTaskForMonq
 {
     public class ApplicationDbContext : DbContext
     {
