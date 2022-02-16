@@ -1,13 +1,11 @@
 using System;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
-using Mails.Models;
-using Mails.Repository;
-using Mails.DtoControllerModels;
-using Mails.Services;
+using TestTaskForMonq.Repository;
+using TestTaskForMonq.DtoControllerModels;
+using TestTaskForMonq.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Mails.Controllers
+namespace TestTaskForMonq.Controllers
 {
     [ApiController]
     [Route("api/mails")]
@@ -23,9 +21,9 @@ namespace Mails.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> GetAsync()
         {
-            var logs = _repository.GetLogs();
+            var logs = await _repository.GetLogsAsync();
             return Ok(logs);
         }
 

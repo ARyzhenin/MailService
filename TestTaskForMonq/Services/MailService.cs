@@ -2,12 +2,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
-using Mails.DtoControllerModels;
-using Mails.Models;
-using Mails.Repository;
+using TestTaskForMonq.DtoControllerModels;
+using TestTaskForMonq.Models;
+using TestTaskForMonq.Repository;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace Mails.Services
+namespace TestTaskForMonq.Services
 {
     public interface IMailService
     {
@@ -19,10 +20,12 @@ namespace Mails.Services
 
     {
         private readonly ILogRepository _repository;
+        private readonly IOptions<EmailSettings> _emailSettings;
 
-        public MailService(ILogRepository repository)
+        public MailService(ILogRepository repository, IOptions<EmailSettings> emailSettings)
         {
             _repository = repository;
+            _emailSettings = emailSettings;
         }
 
         public async Task SendMailAsync(MailInfoDto model)
@@ -35,7 +38,7 @@ namespace Mails.Services
 
             var emailMessage = new MimeMessage();
 
-            emailMessage.From.Add(new MailboxAddress("Имя отправителя", "rav81294@gmail.com"));
+            emailMessage.From.Add(new MailboxAddress(_emailSettings.Value.SenderName, _emailSettings.Value.SendFrom));
 
 
             foreach (var recipient in recipients)
@@ -53,9 +56,9 @@ namespace Mails.Services
             {
                 using (var client = new SmtpClient())
                 {
-                    await client.ConnectAsync("smtp.gmail.com", 587, false);
+                    await client.ConnectAsync(_emailSettings.Value.Host, _emailSettings.Value.Port, _emailSettings.Value.UseSSL);
 
-                    await client.AuthenticateAsync("rav81294@gmail.com", "hccmajhydjvrahhb");
+                    await client.AuthenticateAsync(_emailSettings.Value.SendFrom, _emailSettings.Value.Password);
 
                     await client.SendAsync(emailMessage);
 
@@ -68,8 +71,7 @@ namespace Mails.Services
                 throw;
             }
 
-            //foreach (var recipient in recipients)
-            //{
+            
             try
             {
                 var log = new Log
@@ -83,15 +85,7 @@ namespace Mails.Services
                     DateOfCreation = DateTime.Now,
                     FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
                 };
-                //foreach (var recip in recipients)
-                //{
-
-                //    var recipient = new Recipient
-                //    {
-                //        Id=log.LogId,
-                //        Adress = recip
-                //    };
-                //}
+           
 
                 if (log.FailedMessage != null)
                 {
@@ -102,7 +96,7 @@ namespace Mails.Services
                     log.Result = Status.OK.ToString();
                 }
 
-                _repository.PostLog(log);
+                await _repository.PostLogAsync(log);
             }
             catch (Exception e)
             {
@@ -110,7 +104,7 @@ namespace Mails.Services
                 throw;
             }
 
-            //}
+            
 
         }
 

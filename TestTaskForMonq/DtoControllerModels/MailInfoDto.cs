@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Mails.DtoControllerModels
+﻿namespace TestTaskForMonq.DtoControllerModels
 {
     public class MailInfoDto
     {
