@@ -23,12 +23,21 @@ namespace TestTaskForMonq.Repository
             _context = context;
         }
 
+        /// <summary>
+        /// Method for getting all logs from database
+        /// </summary>
+        /// <returns>Collection of Log</returns>
         public async Task<IEnumerable<Log>> GetLogsAsync()
         {
             var logs = await _context.Logs.Include(u => u.Recipients).ToArrayAsync();
             return logs;
         }
 
+        /// <summary>
+        /// Method for added information about sending email to database
+        /// </summary>
+        /// <param name="log">Object that contains information about the sent email, the delivery status and the date of departure</param>
+        /// <returns></returns>
         public async Task PostLogAsync(Log log)
         {
             await _context.Logs.AddAsync(log);

@@ -20,6 +20,10 @@ namespace TestTaskForMonq.Controllers
             _mailService = mailService;
         }
 
+        /// <summary>
+        /// Get request for return all logs
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
@@ -27,6 +31,11 @@ namespace TestTaskForMonq.Controllers
             return Ok(logs);
         }
 
+        /// <summary>
+        /// Post request for sending email and logging information about this sending in database
+        /// </summary>
+        /// <param name="model">Information about the body, recipients and subject of the email</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> PostAsync(MailInfoDto model)
         {
@@ -39,9 +48,6 @@ namespace TestTaskForMonq.Controllers
             {
                 return BadRequest("Проблемы с отправкой сообщения");
             }
-           
-            
-
         }
     }
 }

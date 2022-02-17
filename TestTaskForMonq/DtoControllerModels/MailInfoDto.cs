@@ -1,5 +1,8 @@
 ﻿namespace TestTaskForMonq.DtoControllerModels
 {
+    /// <summary>
+    /// Сlass that accepts data from json in POST method in controller
+    /// </summary>
     public class MailInfoDto
     {
         public string Subject { get; set; }

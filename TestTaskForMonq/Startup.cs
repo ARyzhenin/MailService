@@ -23,14 +23,17 @@ namespace TestTaskForMonq
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<ILogRepository, LogRepository>();
+
             services.AddTransient<IMailService, MailService>();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            //Для конфигурации почтового клиента в файле конфигурации
+
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSection"));
 
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TestTaskForMonq", Version = "v1" });

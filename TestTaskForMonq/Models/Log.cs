@@ -5,12 +5,18 @@ using System.Text.Json.Serialization;
 
 namespace TestTaskForMonq.Models
 {
+    /// <summary>
+    /// Enum that is used to assign the property Result in Log
+    /// </summary>
     public enum Status
     {
         OK,
         Failed
     }
 
+    /// <summary>
+    /// Class for creating a database
+    /// </summary>
     public class Log
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -29,6 +35,9 @@ namespace TestTaskForMonq.Models
         public string FailedMessage { get; set; }
     }
 
+    /// <summary>
+    /// Class for storing recipients
+    /// </summary>
     public class Recipient
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -28,6 +28,11 @@ namespace TestTaskForMonq.Services
             _emailSettings = emailSettings;
         }
 
+        /// <summary>
+        /// Sending email
+        /// </summary>
+        /// <param name="model">Information about message</param>
+        /// <returns></returns>
         public async Task SendMailAsync(MailInfoDto model)
         {
             var body = model.Body;
@@ -71,7 +76,6 @@ namespace TestTaskForMonq.Services
                 throw;
             }
 
-            
             try
             {
                 var log = new Log
@@ -85,7 +89,7 @@ namespace TestTaskForMonq.Services
                     DateOfCreation = DateTime.Now,
                     FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
                 };
-           
+
 
                 if (log.FailedMessage != null)
                 {
@@ -103,11 +107,13 @@ namespace TestTaskForMonq.Services
                 Console.WriteLine(e);
                 throw;
             }
-
-            
-
         }
 
+        /// <summary>
+        /// Notification delivery status method
+        /// </summary>
+        /// <param name="message">Message we are sending</param>
+        /// <returns>Message delivery status</returns>
         public string ProcessDeliveryStatusNotification(MimeMessage message)
         {
             var report = message.Body as MultipartReport;
