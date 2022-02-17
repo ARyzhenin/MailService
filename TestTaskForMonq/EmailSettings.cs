@@ -1,5 +1,8 @@
 ﻿namespace TestTaskForMonq
 {
+    /// <summary>
+    /// Class for setting SmtpClient
+    /// </summary>
     public class EmailSettings
     {
         public string Host { get; set; }
