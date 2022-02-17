@@ -57,56 +57,41 @@ namespace TestTaskForMonq.Services
             {
                 Text = body
             };
-            try
+
+            using (var client = new SmtpClient())
             {
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync(_emailSettings.Value.Host, _emailSettings.Value.Port, _emailSettings.Value.UseSSL);
+                await client.ConnectAsync(_emailSettings.Value.Host, _emailSettings.Value.Port, _emailSettings.Value.UseSSL);
 
-                    await client.AuthenticateAsync(_emailSettings.Value.SendFrom, _emailSettings.Value.Password);
+                await client.AuthenticateAsync(_emailSettings.Value.SendFrom, _emailSettings.Value.Password);
 
-                    await client.SendAsync(emailMessage);
+                await client.SendAsync(emailMessage);
 
-                    await client.DisconnectAsync(true);
-                }
-
-            }
-            catch (Exception)
-            {
-                throw;
+                await client.DisconnectAsync(true);
             }
 
-            try
+            var log = new Log
             {
-                var log = new Log
+                Body = model.Body,
+                Recipients = recipients.Select(recipient => new Recipient()
                 {
-                    Body = model.Body,
-                    Recipients = recipients.Select(recipient => new Recipient()
-                    {
-                        EMailAdress = recipient
-                    }).ToList(),
-                    Subject = model.Subject,
-                    DateOfCreation = DateTime.Now,
-                    FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
-                };
+                    EMailAdress = recipient
+                }).ToList(),
+                Subject = model.Subject,
+                DateOfCreation = DateTime.Now,
+                FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
+            };
 
 
-                if (log.FailedMessage != null)
-                {
-                    log.Result = Status.Failed.ToString();
-                }
-                else
-                {
-                    log.Result = Status.OK.ToString();
-                }
-
-                await _repository.PostLogAsync(log);
-            }
-            catch (Exception e)
+            if (log.FailedMessage != null)
             {
-                Console.WriteLine(e);
-                throw;
+                log.Result = Status.Failed.ToString();
             }
+            else
+            {
+                log.Result = Status.OK.ToString();
+            }
+
+            await _repository.PostLogAsync(log);
         }
 
         /// <summary>

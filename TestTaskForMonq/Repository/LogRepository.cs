@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using TestTaskForMonq.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +7,7 @@ namespace TestTaskForMonq.Repository
 {
     public interface ILogRepository
     {
-        public Task<IEnumerable<Log>> GetLogsAsync();
+        public Task<Log[]> GetLogsAsync();
 
         public Task PostLogAsync(Log log);
     }
@@ -27,10 +26,9 @@ namespace TestTaskForMonq.Repository
         /// Method for getting all logs from database
         /// </summary>
         /// <returns>Collection of Log</returns>
-        public async Task<IEnumerable<Log>> GetLogsAsync()
+        public async Task<Log[]> GetLogsAsync()
         {
-            var logs = await _context.Logs.Include(u => u.Recipients).ToArrayAsync();
-            return logs;
+            return await _context.Logs.Include(u => u.Recipients).ToArrayAsync();
         }
 
         /// <summary>

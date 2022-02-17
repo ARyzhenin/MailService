@@ -27,7 +27,14 @@ namespace TestTaskForMonq.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
+            // todo add try-catch
             var logs = await _repository.GetLogsAsync();
+
+            if (logs.Length == 0)
+            {
+                return NotFound();
+            }
+
             return Ok(logs);
         }
 
@@ -39,6 +46,12 @@ namespace TestTaskForMonq.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync(MailInfoDto model)
         {
+            //todo check model to be correct
+            if (model.Body == null || model.Subject == null || model.Recipients.Length == 0)
+            {
+                return BadRequest("Твоя модель хуйня");
+            }
+
             try
             {
                 await _mailService.SendMailAsync(model);
@@ -46,6 +59,7 @@ namespace TestTaskForMonq.Controllers
             }
             catch (Exception)
             {
+                // todo: Возникла ошибка отправки сообщения, пожалуйста попробуйте позже
                 return BadRequest("Проблемы с отправкой сообщения");
             }
         }
