@@ -4,6 +4,8 @@ using TestTaskForMonq.Repository;
 using TestTaskForMonq.DtoControllerModels;
 using TestTaskForMonq.Services;
 using Microsoft.AspNetCore.Mvc;
+using TestTaskForMonq.Models;
+using System.Linq;
 
 namespace TestTaskForMonq.Controllers
 {
@@ -27,15 +29,22 @@ namespace TestTaskForMonq.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            // todo add try-catch
-            var logs = await _repository.GetLogsAsync();
-
-            if (logs.Length == 0)
+            try
             {
-                return NotFound();
-            }
+                var logs = await _repository.GetLogsAsync();
 
-            return Ok(logs);
+                if (logs.Length == 0)
+                {
+                    return NotFound("Error occurred when returning logs from the database");
+                }
+
+                return Ok(logs);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
         /// <summary>
@@ -46,10 +55,9 @@ namespace TestTaskForMonq.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync(MailInfoDto model)
         {
-            //todo check model to be correct
-            if (model.Body == null || model.Subject == null || model.Recipients.Length == 0)
+            if (model.Body == null || model.Recipients.Length == 0)
             {
-                return BadRequest("Твоя модель хуйня");
+                return BadRequest("Incorrect data");
             }
 
             try
@@ -57,10 +65,21 @@ namespace TestTaskForMonq.Controllers
                 await _mailService.SendMailAsync(model);
                 return Ok();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // todo: Возникла ошибка отправки сообщения, пожалуйста попробуйте позже
-                return BadRequest("Проблемы с отправкой сообщения");
+                await _repository.PostLogAsync(new Log
+                {
+                    Body = model.Body,
+                    DateOfCreation = DateTime.Now,
+                    Subject = model.Subject,
+                    Recipients = model.Recipients.Select(recipient => new Recipient()
+                    {
+                        EMailAdress = recipient
+                    }).ToList(),
+                    FailedMessage = e.Message,
+                    Result = Status.Failed.ToString()
+                });
+                return BadRequest(e);
             }
         }
     }
