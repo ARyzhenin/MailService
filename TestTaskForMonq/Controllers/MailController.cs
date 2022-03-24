@@ -67,7 +67,7 @@ namespace TestTaskForMonq.Controllers
             }
             catch (Exception e)
             {
-                await _repository.PostLogAsync(new Log
+                _repository.PostLog(new Log
                 {
                     Body = model.Body,
                     DateOfCreation = DateTime.Now,

@@ -81,7 +81,6 @@ namespace TestTaskForMonq.Services
                 FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
             };
 
-
             if (log.FailedMessage != null)
             {
                 log.Result = Status.Failed.ToString();
@@ -91,7 +90,7 @@ namespace TestTaskForMonq.Services
                 log.Result = Status.OK.ToString();
             }
 
-            await _repository.PostLogAsync(log);
+            _repository.PostLog(log);
         }
 
         /// <summary>
@@ -105,7 +104,6 @@ namespace TestTaskForMonq.Services
 
             if (report == null || report.ReportType == null || !report.ReportType.Equals("delivery-status", StringComparison.OrdinalIgnoreCase))
             {
-
                 return null;
             }
 

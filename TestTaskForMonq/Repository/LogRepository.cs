@@ -9,7 +9,7 @@ namespace TestTaskForMonq.Repository
     {
         public Task<Log[]> GetLogsAsync();
 
-        public Task PostLogAsync(Log log);
+        public Log PostLog(Log log);
     }
 
 
@@ -36,10 +36,11 @@ namespace TestTaskForMonq.Repository
         /// </summary>
         /// <param name="log">Object that contains information about the sent email, the delivery status and the date of departure</param>
         /// <returns></returns>
-        public async Task PostLogAsync(Log log)
+        public Log PostLog(Log log)
         {
-            await _context.Logs.AddAsync(log);
-            await _context.SaveChangesAsync();
+            _context.Logs.Add(log);
+            _context.SaveChanges();
+            return log;
         }
     }
 }
