@@ -22,7 +22,7 @@ namespace TestTaskForMonq.Services
         private readonly ILogRepository _repository;
         private readonly IOptions<EmailSettings> _emailSettings;
 
-        public MailService(ILogRepository repository, IOptions<EmailSettings> emailSettings)
+        public MailService(ILogRepository repository, IOptions<EmailSettings> emailSettings, SmtpClient smtpClient)
         {
             _repository = repository;
             _emailSettings = emailSettings;
@@ -41,15 +41,20 @@ namespace TestTaskForMonq.Services
 
             var recipients = model.Recipients;
 
+            Log log = new()
+            {
+                Body = model.Body,
+                Recipients = recipients.Select(recipient => new Recipient()
+                {
+                    EMailAdress = recipient
+                }).ToList(),
+                Subject = model.Subject,
+                DateOfCreation = DateTime.Now
+            };
+
             var emailMessage = new MimeMessage();
 
             emailMessage.From.Add(new MailboxAddress(_emailSettings.Value.SenderName, _emailSettings.Value.SendFrom));
-
-
-            foreach (var recipient in recipients)
-            {
-                emailMessage.To.Add(new MailboxAddress("", recipient));
-            }
 
             emailMessage.Subject = subject;
 
@@ -58,40 +63,43 @@ namespace TestTaskForMonq.Services
                 Text = body
             };
 
-            using (var client = new SmtpClient())
+
+            foreach (var recipient in recipients)
             {
-                await client.ConnectAsync(_emailSettings.Value.Host, _emailSettings.Value.Port, _emailSettings.Value.UseSSL);
-
-                await client.AuthenticateAsync(_emailSettings.Value.SendFrom, _emailSettings.Value.Password);
-
-                await client.SendAsync(emailMessage);
-
-                await client.DisconnectAsync(true);
+                emailMessage.To.Add(new MailboxAddress("", recipient));
             }
 
-            var log = new Log
+            try
             {
-                Body = model.Body,
-                Recipients = recipients.Select(recipient => new Recipient()
+                using (var client = new SmtpClient())
                 {
-                    EMailAdress = recipient
-                }).ToList(),
-                Subject = model.Subject,
-                DateOfCreation = DateTime.Now,
-                FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
-            };
+                    await client.ConnectAsync(_emailSettings.Value.Host, _emailSettings.Value.Port, _emailSettings.Value.UseSSL);
 
-            if (log.FailedMessage != null)
+                    await client.AuthenticateAsync(_emailSettings.Value.SendFrom, _emailSettings.Value.Password);
+
+                    await client.SendAsync(emailMessage);
+
+                    await client.DisconnectAsync(true);
+                }
+                log.FailedMessage = ProcessDeliveryStatusNotification(emailMessage);
+            }
+            catch (Exception e)
+            {
+                log.FailedMessage += "Ошибка при использовании SMTP клиента, сообщение об ошибке: " + e.Message;
+            }
+            finally
             {
                 log.Result = Status.Failed.ToString();
-            }
-            else
-            {
-                log.Result = Status.OK.ToString();
+                _repository.PostLog(log);
             }
 
-            _repository.PostLog(log);
+            if (log.FailedMessage == null)
+            {
+                log.Result = Status.OK.ToString();
+                _repository.PostLog(log);
+            }
         }
+
 
         /// <summary>
         /// Notification delivery status method
@@ -138,8 +146,10 @@ namespace TestTaskForMonq.Services
 
                         case "delivered":
                             return $"Delivery of message {envelopeId} delivered for { address}";
+
                         case "relayed":
                             return $"Delivery of message {envelopeId} relayed for { address}";
+
                         case "expanded":
                             return $"Delivery of message {envelopeId} expanded for { address}";
                     }

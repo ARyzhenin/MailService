@@ -61,3 +61,4 @@ C:\Users\Александр\source\repos\Test\TestTaskForMonq\obj\Debug\net5.0\T
 C:\Users\Александр\source\repos\Test\TestTaskForMonq\obj\Debug\net5.0\ref\TestTaskForMonq.dll
 C:\Users\Александр\source\repos\Test\TestTaskForMonq\obj\Debug\net5.0\TestTaskForMonq.pdb
 C:\Users\Александр\source\repos\Test\TestTaskForMonq\obj\Debug\net5.0\TestTaskForMonq.genruntimeconfig.cache
+C:\Users\Александр\source\repos\Test\TestTaskForMonq\bin\Debug\net5.0\EmailValidation.dll

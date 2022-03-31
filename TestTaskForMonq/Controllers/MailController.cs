@@ -6,6 +6,7 @@ using TestTaskForMonq.Services;
 using Microsoft.AspNetCore.Mvc;
 using TestTaskForMonq.Models;
 using System.Linq;
+using TestTaskForMonq.Helpers;
 
 namespace TestTaskForMonq.Controllers
 {
@@ -35,7 +36,7 @@ namespace TestTaskForMonq.Controllers
 
                 if (logs.Length == 0)
                 {
-                    return NotFound("Error occurred when returning logs from the database");
+                    return NotFound( "Logs not found in database");
                 }
 
                 return Ok(logs);
@@ -43,7 +44,7 @@ namespace TestTaskForMonq.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.StackTrace);
             }
         }
 
@@ -55,32 +56,16 @@ namespace TestTaskForMonq.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync(MailInfoDto model)
         {
+            //model.IsValid();
+            //ƒобавить проверку модели на валидность
             if (model.Body == null || model.Recipients.Length == 0)
             {
                 return BadRequest("Incorrect data");
             }
 
-            try
-            {
-                await _mailService.SendMailAsync(model);
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                _repository.PostLog(new Log
-                {
-                    Body = model.Body,
-                    DateOfCreation = DateTime.Now,
-                    Subject = model.Subject,
-                    Recipients = model.Recipients.Select(recipient => new Recipient()
-                    {
-                        EMailAdress = recipient
-                    }).ToList(),
-                    FailedMessage = e.Message,
-                    Result = Status.Failed.ToString()
-                });
-                return BadRequest(e);
-            }
+            await _mailService.SendMailAsync(model);
+            return Ok(model);
+
         }
     }
 }

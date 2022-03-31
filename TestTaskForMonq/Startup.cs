@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using MailKit.Net.Smtp;
 
 namespace TestTaskForMonq
 {
@@ -25,7 +26,7 @@ namespace TestTaskForMonq
             services.AddTransient<ILogRepository, LogRepository>();
 
             services.AddTransient<IMailService, MailService>();
-
+            
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));

@@ -33,6 +33,7 @@
     ".NETCoreApp,Version=v5.0": {
       "TestTaskForMonq/1.0.0": {
         "dependencies": {
+          "EmailValidation": "1.0.7",
           "MailKit": "3.1.1",
           "Microsoft.EntityFrameworkCore": "5.0.13",
           "Microsoft.EntityFrameworkCore.Design": "5.0.13",
@@ -326,6 +327,20 @@
         },
         "compile": {
           "TestTaskForMonq.dll": {}
+        }
+      },
+      "EmailValidation/1.0.7": {
+        "dependencies": {
+          "System.ComponentModel.Annotations": "5.0.0"
+        },
+        "runtime": {
+          "lib/net5.0/EmailValidation.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.7.0"
+          }
+        },
+        "compile": {
+          "lib/net5.0/EmailValidation.dll": {}
         }
       },
       "Humanizer.Core/2.8.26": {
@@ -3122,6 +3137,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "EmailValidation/1.0.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kBYG4qrGmwjlNvuN7EfJsEr8fJZKUQVjhpYg1B7jftd42y2tpnQ/UQ15/77sR+RL2bC1+fam2aoNUokYen/xjA==",
+      "path": "emailvalidation/1.0.7",
+      "hashPath": "emailvalidation.1.0.7.nupkg.sha512"
     },
     "Humanizer.Core/2.8.26": {
       "type": "package",
