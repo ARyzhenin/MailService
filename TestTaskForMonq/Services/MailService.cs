@@ -7,12 +7,13 @@ using TestTaskForMonq.Models;
 using TestTaskForMonq.Repository;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using System.Diagnostics;
 
 namespace TestTaskForMonq.Services
 {
     public interface IMailService
     {
-        public Task SendMailAsync(MailInfoDto mailInfo);
+        public Task SendMailAsync(EmailDTO mailInfo);
     }
 
 
@@ -20,9 +21,9 @@ namespace TestTaskForMonq.Services
 
     {
         private readonly ILogRepository _repository;
-        private readonly IOptions<EmailSettings> _emailSettings;
+        private readonly IOptions<SMTPSettings> _emailSettings;
 
-        public MailService(ILogRepository repository, IOptions<EmailSettings> emailSettings)
+        public MailService(ILogRepository repository, IOptions<SMTPSettings> emailSettings)
         {
             _repository = repository;
             _emailSettings = emailSettings;
@@ -31,25 +32,30 @@ namespace TestTaskForMonq.Services
         /// <summary>
         /// Sending email
         /// </summary>
-        /// <param name="model">Information about message</param>
+        /// <param name="emailDTO">Information about message</param>
         /// <returns></returns>
-        public async Task SendMailAsync(MailInfoDto model)
+        public async Task SendMailAsync(EmailDTO emailDTO)
         {
-            var body = model.Body;
+            var body = emailDTO.Body;
 
-            var subject = model.Subject;
+            var subject = emailDTO.Subject;
 
-            var recipients = model.Recipients;
+            var recipients = emailDTO.Recipients;
+
+            Log log = new()
+            {
+                Body = emailDTO.Body,
+                Recipients = recipients.Select(recipient => new Recipient()
+                {
+                    EMailAdress = recipient
+                }).ToList(),
+                Subject = emailDTO.Subject,
+                DateOfCreation = DateTime.Now
+            };
 
             var emailMessage = new MimeMessage();
 
             emailMessage.From.Add(new MailboxAddress(_emailSettings.Value.SenderName, _emailSettings.Value.SendFrom));
-
-
-            foreach (var recipient in recipients)
-            {
-                emailMessage.To.Add(new MailboxAddress("", recipient));
-            }
 
             emailMessage.Subject = subject;
 
@@ -58,40 +64,53 @@ namespace TestTaskForMonq.Services
                 Text = body
             };
 
-            using (var client = new SmtpClient())
+
+            foreach (var recipient in recipients)
             {
-                await client.ConnectAsync(_emailSettings.Value.Host, _emailSettings.Value.Port, _emailSettings.Value.UseSSL);
-
-                await client.AuthenticateAsync(_emailSettings.Value.SendFrom, _emailSettings.Value.Password);
-
-                await client.SendAsync(emailMessage);
-
-                await client.DisconnectAsync(true);
+                emailMessage.To.Add(new MailboxAddress("", recipient));
             }
 
-            var log = new Log
+            try
             {
-                Body = model.Body,
-                Recipients = recipients.Select(recipient => new Recipient()
+                using (var client = new SmtpClient())
                 {
-                    EMailAdress = recipient
-                }).ToList(),
-                Subject = model.Subject,
-                DateOfCreation = DateTime.Now,
-                FailedMessage = ProcessDeliveryStatusNotification(emailMessage)
-            };
+                    await client.ConnectAsync(_emailSettings.Value.Host, _emailSettings.Value.Port, _emailSettings.Value.UseSSL);
 
-            if (log.FailedMessage != null)
+                    await client.AuthenticateAsync(_emailSettings.Value.SendFrom, _emailSettings.Value.Password);
+
+                    await client.SendAsync(emailMessage);
+
+                    client.MessageSent += Client_MessageSent; ;
+
+                    await client.DisconnectAsync(true);
+                }
+                log.FailedMessage = ProcessDeliveryStatusNotification(emailMessage);
+            }
+            catch (Exception e)
+            {
+                log.FailedMessage += "Ошибка при использовании SMTP клиента, сообщение об ошибке: " + e.Message;
+            }
+            finally
             {
                 log.Result = Status.Failed.ToString();
-            }
-            else
-            {
-                log.Result = Status.OK.ToString();
+                _repository.PostLog(log);
             }
 
-            _repository.PostLog(log);
+            if (log.FailedMessage == null)
+            {
+                log.Result = Status.OK.ToString();
+                _repository.PostLog(log);
+            }
         }
+
+        private void Client_MessageSent(object sender, MailKit.MessageSentEventArgs e)
+        {
+            Debug.WriteLine("Произошло событие, сообщение отправлено");
+
+        }
+
+
+
 
         /// <summary>
         /// Notification delivery status method
@@ -138,8 +157,10 @@ namespace TestTaskForMonq.Services
 
                         case "delivered":
                             return $"Delivery of message {envelopeId} delivered for { address}";
+
                         case "relayed":
                             return $"Delivery of message {envelopeId} relayed for { address}";
+
                         case "expanded":
                             return $"Delivery of message {envelopeId} expanded for { address}";
                     }

@@ -3,7 +3,7 @@
     /// <summary>
     /// Class for setting SmtpClient
     /// </summary>
-    public class EmailSettings
+    public class SMTPSettings
     {
         public string Host { get; set; }
         public string SendFrom { get; set; }
