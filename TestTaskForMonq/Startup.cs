@@ -31,7 +31,7 @@ namespace TestTaskForMonq
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
-            services.Configure<EmailSettings>(Configuration.GetSection("EmailSection"));
+            services.Configure<SMTPSettings>(Configuration.GetSection("EmailSection"));
 
             services.AddControllers();
 

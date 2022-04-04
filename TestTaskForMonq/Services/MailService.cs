@@ -7,12 +7,13 @@ using TestTaskForMonq.Models;
 using TestTaskForMonq.Repository;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using System.Diagnostics;
 
 namespace TestTaskForMonq.Services
 {
     public interface IMailService
     {
-        public Task SendMailAsync(MailInfoDto mailInfo);
+        public Task SendMailAsync(EmailDTO mailInfo);
     }
 
 
@@ -20,9 +21,9 @@ namespace TestTaskForMonq.Services
 
     {
         private readonly ILogRepository _repository;
-        private readonly IOptions<EmailSettings> _emailSettings;
+        private readonly IOptions<SMTPSettings> _emailSettings;
 
-        public MailService(ILogRepository repository, IOptions<EmailSettings> emailSettings, SmtpClient smtpClient)
+        public MailService(ILogRepository repository, IOptions<SMTPSettings> emailSettings)
         {
             _repository = repository;
             _emailSettings = emailSettings;
@@ -31,24 +32,24 @@ namespace TestTaskForMonq.Services
         /// <summary>
         /// Sending email
         /// </summary>
-        /// <param name="model">Information about message</param>
+        /// <param name="emailDTO">Information about message</param>
         /// <returns></returns>
-        public async Task SendMailAsync(MailInfoDto model)
+        public async Task SendMailAsync(EmailDTO emailDTO)
         {
-            var body = model.Body;
+            var body = emailDTO.Body;
 
-            var subject = model.Subject;
+            var subject = emailDTO.Subject;
 
-            var recipients = model.Recipients;
+            var recipients = emailDTO.Recipients;
 
             Log log = new()
             {
-                Body = model.Body,
+                Body = emailDTO.Body,
                 Recipients = recipients.Select(recipient => new Recipient()
                 {
                     EMailAdress = recipient
                 }).ToList(),
-                Subject = model.Subject,
+                Subject = emailDTO.Subject,
                 DateOfCreation = DateTime.Now
             };
 
@@ -79,6 +80,8 @@ namespace TestTaskForMonq.Services
 
                     await client.SendAsync(emailMessage);
 
+                    client.MessageSent += Client_MessageSent; ;
+
                     await client.DisconnectAsync(true);
                 }
                 log.FailedMessage = ProcessDeliveryStatusNotification(emailMessage);
@@ -99,6 +102,14 @@ namespace TestTaskForMonq.Services
                 _repository.PostLog(log);
             }
         }
+
+        private void Client_MessageSent(object sender, MailKit.MessageSentEventArgs e)
+        {
+            Debug.WriteLine("Произошло событие, сообщение отправлено");
+
+        }
+
+
 
 
         /// <summary>

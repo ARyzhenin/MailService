@@ -3,7 +3,7 @@
     /// <summary>
     /// Сlass that accepts data from json in POST method in controller
     /// </summary>
-    public class MailInfoDto
+    public class EmailDTO
     {
         public string Subject { get; set; }
 

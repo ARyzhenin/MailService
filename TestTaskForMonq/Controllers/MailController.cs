@@ -36,7 +36,7 @@ namespace TestTaskForMonq.Controllers
 
                 if (logs.Length == 0)
                 {
-                    return NotFound( "Logs not found in database");
+                    return NotFound("Logs not found in database");
                 }
 
                 return Ok(logs);
@@ -51,21 +51,19 @@ namespace TestTaskForMonq.Controllers
         /// <summary>
         /// Post request for sending email and logging information about this sending in database
         /// </summary>
-        /// <param name="model">Information about the body, recipients and subject of the email</param>
+        /// <param name="emailDTO">Information about the body, recipients and subject of the email</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> PostAsync(MailInfoDto model)
+        public async Task<IActionResult> PostAsync(EmailDTO emailDTO)
         {
-            //model.IsValid();
-            //ƒобавить проверку модели на валидность
-            if (model.Body == null || model.Recipients.Length == 0)
+            if (!ValidationEmailDTO.IsValid(emailDTO))
             {
                 return BadRequest("Incorrect data");
             }
 
-            await _mailService.SendMailAsync(model);
-            return Ok(model);
+            await _mailService.SendMailAsync(emailDTO);
 
+            return Ok(emailDTO);
         }
     }
 }
